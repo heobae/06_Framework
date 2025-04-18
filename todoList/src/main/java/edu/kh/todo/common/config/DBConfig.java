@@ -3,6 +3,7 @@ package edu.kh.todo.common.config;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -24,14 +25,19 @@ import com.zaxxer.hikari.HikariDataSource;
  * 다른 properties도 추가하고 싶으면 어노테이션을 계속 추가
  */
 
-@Configuration
+@Configuration	// src/main/resources
 @PropertySource("classpath:/config.properties")
 public class DBConfig{
 	
 	// 필드
 	@Autowired // (DI, 의존성 주입)
-	private ApplicationContext applicationContext; // application scope 객체 : 즉, 현재 프로젝트
+	private ApplicationContext applicationContext; // new = ApplicationContext();
+	// application scope 객체 : 즉, 현재 프로젝트
+	// -> 스프링이 관리하고 있는 ApplicationContext 객체를 의존성 주입받는다.
+	// -> 현재 프로젝트의 전반적인 DB설정과 Bean 관리에 접근할 수 있도록 해줌.
 	
+	// 메서드
+	////////////////////////// HikariCp 설정 ////////////////////////////////////
 	// @Bean
 	// - 개발자가 수동으로 bean을 등록하는 어노테이션
 	// - @Bean 어노테이션이 작성된 메서드에서 반환된 객체는
@@ -42,45 +48,85 @@ public class DBConfig{
 	// prefix를 지정하여 spring.datasource.hikari으로 시작하는 설정을 모두 적용
 	@ConfigurationProperties(prefix = "spring.datasource.hikari")
 	public HikariConfig hikariConfig() {
-	
+		
+		// -> config.properties 파일에서 읽어 온
+		// spring.datasource.hikari로 시작하는 모든 값이
+		// 자동으로 HikariConfig라는 객체의 알맞은 필드에 세팅이 되어 객체화 됨.
 		return new HikariConfig();
 	}
-	@Bean
+	
+	
+	@Bean // 반환하는 객체를 스프링이 관리하게 함.
 	public DataSource dataSource(HikariConfig config) {
+		// 매개변수 HikariConfig config
+		// -> 등록된 Bean 중 HikariConfig 타입의 Bean을 자동으로 주입
+		// -> HikariConfig 객체를 받아, DataSource 객체를 생성하는데 사용.
 	
 		DataSource dataSource = new HikariDataSource(config);
-		
+		//						다형성 업캐스팅이 적용된 상태
+		// DataSource : 
+		// 애플리케이션이 데이터베이스에 연결할 때 사용하는 설정.
+		// 1) DB 연결 정보 제공 (url, username, password)
+		// 2) Connection pool 관리 (Connection 생성/생명주기 관리)
+		// 3) 트랜잭션 관리
 		return dataSource;
 	}
 
 ////////////////////////////Mybatis 설정 추가 ////////////////////////////
+	// Mybatis : Java 애플리케이션에서 SQL을 더 쉽게 사용할 수 있도록 도와주는
+	//			 영속성 프레임워크.
+	// 영속성 프레임워크(Persistence Framework)는 애플리케이션의 데이터를
+	// 데이터베이스와 같은 저장소에 영구적으로 저장하고,
+	// 이를 쉽게 CRUD 할 수 있도록 도와주는 프레임워크.
+	
 	// SqlSessionFactory : SqlSession을 만드는 객체
 	@Bean
 	public SqlSessionFactory sessionFactory(DataSource dataSource) throws Exception{
-	SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
-	sessionFactoryBean.setDataSource(dataSource);
-	// 매퍼 파일이 모여있는 경로 지정
-	sessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:/mapper
-
-
-	// 별칭을 지정해야하는 DTO가 모여있는 패키지 지정
-	//-> 해당 패키지에 있는 모든 클래스가 클래스명으로 별칭이 지정됨
-	sessionFactoryBean.setTypeAliasesPackage("edu.kh.project.member.model.dto");
-	// 마이바티스 설정 파일 경로 지정
-	sessionFactoryBean.setConfigLocation(applicationContext.getResource("classpath:mybatis-c
-	// SqlSession 객체 반환
-	return sessionFactoryBean.getObject();
-}
+					// 매개변수로 DataSource를 받아와 DB 연결 정보를 사용할 수 있도록 함
+		
+		// MyBatis의 SqlSession을 생성하는 역할을 할 객체를 생성
+		SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
+		
+		// sessionFactoryBean이름의 공장에 MyBatis를 이용하기 위한 각종 세팅을 함..
+		sessionFactoryBean.setDataSource(dataSource);
+		
+		// 세팅1. mapper.xml(SQL 작성해 둘 파일) 파일이 모이는 경로를 지정
+		// -> MyBatis 코드 수행 시 xxx-mapper.xml을 읽을 수 있음.
+		// 매퍼 파일이 모여있는 경로 지정
+		// mappers 폴더에 있는 모든 mapper 파일들을 관리하겠다.
+		sessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:/mappers/**.xml"));
+			// 현재프로젝트.자원을얻겠다.src/main/resources/mappers/ 하위의 모든 xml 파일
+		
+		// 세팅2. 해당 패키지 내 모든 클래스의 별칭을 등록
+		// -> MyBatis는 특정 클래스 지정 시 패키지명.클래스명까지 모두 작성해야 함.
+		// -> 긴 이름을 짧게 부를 수 있도록 별칭 설정할 수 있음.
+		
+		// 별칭을 지정해야하는 DTO가 모여있는 패키지 지정
+		//-> 해당 패키지에 있는 모든 클래스가 클래스명으로 별칭이 지정됨
+		sessionFactoryBean.setTypeAliasesPackage("edu.kh.todo");
+		// -> edu.kh.todo 세팅 시 패키지 하위에 있는 모든 클래스가
+		//	  클래스명으로 별칭이 지정됨.
+		// -> ex) edu.kh.todo.medel.dto.Todo -> Todo (별칭 등록)
+		
+		// 세팅3. 마이바티스 설정 파일 경로 지정
+		sessionFactoryBean.setConfigLocation(applicationContext.getResource("classpath:mybatis-config.xml"));
+		// mabatis-config.xml의 내용을 읽어들임
+		// -> jdbcTypeForNull / mapUnderscoreToCamelCase를 적용함.
+		
+		// SqlSession 객체 반환
+		return sessionFactoryBean.getObject();
+	}
 
 	// SqlSessionTemplate : 기본 SQL 실행 + 트랜잭션 처리
+	// Connection + DBCP + MyBatis + 트랜잭션 처리
 	@Bean
 	public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sessionFactory) {
+		return new SqlSessionTemplate(sessionFactory);
+	}
 	
-	return new SqlSessionTemplate(sessionFactory);
-}
 	// DataSourceTransactionManager : 트랜잭션 매니저
 	@Bean
 	public DataSourceTransactionManager dataSourceTransactionManager(DataSource dataSource) {
-	return new DataSourceTransactionManager(dataSource);
+		return new DataSourceTransactionManager(dataSource);
 	}
 }

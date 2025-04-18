@@ -9,7 +9,7 @@
 			  pstmt.setString(?, "user01")
 			  pstmt.set???? (?, null)
 		 -->
-		<setting name="jdbcTypeForNull" value="Null"/>
+		<setting name="jdbcTypeForNull" value="NULL"/>
 		
 		<!--  DB의 UnderScore(_) 표기법 사용 <-> Java의 CamelCase 서로 변환될 수 있도록 매핑
 			  
