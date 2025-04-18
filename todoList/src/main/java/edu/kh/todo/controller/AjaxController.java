@@ -110,6 +110,11 @@ public class AjaxController {
 		
 		return todoList;
 		
+		// List(Java 전용 타입)를 반환
+		// -> JS가 인식할 수 없기 때문에 JSON으로 변환 필요!
+		// -> HttpMessageConvertor가 JSON 형태로 변환하여 반환
+		// List -> JSON -> JS
+		
 	}
 
 }
