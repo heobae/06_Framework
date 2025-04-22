@@ -303,7 +303,7 @@ deleteBtn.addEventListener("click", () => {
   });
   
 });
-<<<<<<< HEAD
+
 
 // 완료 여부 변경 버튼 클릭 시
 changeComplete.addEventListener("click", () => {
@@ -434,8 +434,7 @@ updateBtn.addEventListener("click", e => {
 
 });
 
-=======
->>>>>>> 9e3f610 (0421 팝업 상세조회, 삭제, x버튼)
+
 
 selectTodoList();
 getTotalCount();

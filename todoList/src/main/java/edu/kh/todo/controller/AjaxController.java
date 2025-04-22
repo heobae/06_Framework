@@ -138,7 +138,7 @@ public class AjaxController {
 		
 		return service.todoDelete(todoNo);
 	}
-<<<<<<< HEAD
+
 	
 	// 완료 여부 변경(PUT)
 	@ResponseBody
@@ -157,7 +157,6 @@ public class AjaxController {
 		return service.todoUpdate(todo);
 		
 	}
-=======
->>>>>>> 9e3f610 (0421 팝업 상세조회, 삭제, x버튼)
+
 
 }
