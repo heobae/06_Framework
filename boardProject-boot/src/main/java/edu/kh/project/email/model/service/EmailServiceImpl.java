@@ -123,5 +123,7 @@ public class EmailServiceImpl implements EmailService {
 		return UUID.randomUUID().toString().substring(0, 6);
 	}
 	
+	// 깃 테스트1
+	
 	
 }
