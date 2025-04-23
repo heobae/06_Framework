@@ -193,3 +193,57 @@ function addZero(number) {
   if(number < 10) return "0" + number;
   else            return number;
 }
+
+// ----------------------------------------------------------------
+// 인증하기 버튼 클릭 시
+// 입력된 인증번호를 비동기로 서버에 전달
+// -> 입력된 인증번호와 발급된 인증번호가 같은지 비교
+//    같으면 1 , 아니면 0
+// 단, 타이머가 00:00초가 아닐 경우에만 수행
+checkAuthKeyBtn.addEventListener("click", () => {
+  
+  if(min === 0 && sec === 0) { // 타이머가 00:00인 경우
+    alert("인증번호 입력 제한시간을 초과하였습니다. 다시 발급해주세요.");
+    return;
+  }
+
+  // 인증번호가 제대로 입력 안 된 경우 (길이가 6미만 또는 7이상)
+  if(authKey.value.length < 6 || authKey.value.length >= 7 ) {  
+    alert("인증번호를 정확히 입력해주세요.");
+    return;
+  }
+
+  // 문제 없는 경우 (제한시간, 인증번호 길이 유효 시)
+  // 입력받은 이메일, 인증번호로 JS 객체 생성
+  const obj = {
+    "email" : memberEmail.value,
+    "authKey" : authKey.value
+  };
+
+  // 인증번호 확인용 비동기 요청 보내기
+  fetch("/email/checkAuthKey", {
+    method : "POST",
+    headers : {"Content-Type" : "application/json"},
+    body : JSON.stringify(obj)  // obj 라는 JS 객체를 JSON으로 변경
+  })
+  .then (resp => resp.text())
+  .then (result => {
+    // 1 or 0
+
+    if(result == 0) { // 일치 X
+      alert("인증번호가 일치하지 않습니다!");
+      checkObj.authkey = false;
+      return;
+    }
+
+    // 일치 할 때
+    clearInterval(authTimer); // 타이머 멈춤
+
+    authKeyMessage.innerText = "인증 되었습니다.";
+    authKeyMessage.classList.remove('error');
+    authKeyMessage.classList.add('confirm');
+
+    checkObj.authkey = true;  // 인증번호 검사 여부 true 변경
+  })
+});
+
