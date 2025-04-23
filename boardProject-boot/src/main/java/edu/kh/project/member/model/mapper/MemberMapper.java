@@ -25,4 +25,10 @@ public interface MemberMapper {
 	 */
 	int checkNickname(String memberNickname);
 
+	/** 회원가입
+	 * @param inputMember
+	 * @return
+	 */
+	int signup(Member inputMember);
+
 }

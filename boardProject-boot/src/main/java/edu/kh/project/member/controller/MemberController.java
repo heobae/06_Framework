@@ -126,6 +126,7 @@ public class MemberController {
 	}
 	
 	
+	
 	/** 이메일 중복검사(비동기 요청)
 	 * @return 중복된 데이터의 개수
 	 */
@@ -144,6 +145,59 @@ public class MemberController {
 	public int checkNickname(@RequestParam("memberNickname") String memberNickname) {
 		return service.checkNickname(memberNickname);
 	}
+	
+	/** 회원가입
+	 * @param inputMember : 입력된 회원 정보(memberEmail, memberPw, memberNickname, memberTel,
+	 * 						memberAddress(따로 배열로 받아 처리)
+	 * @param memberAddress : 입력한 주소 input 3개의 값을 배열로 전달 [우편번호, 도로명/지번주소, 상세주소]
+	 * @param ra : 리다이렉트 시 request -> session -> request로 데이터 전달하는 객체
+	 * @return
+	 */
+	@PostMapping("signup")
+	public String signup(Member inputMember,
+						 @RequestParam("memberAddress") String[] memberAddress,
+						 RedirectAttributes ra) {
+		
+	//	log.debug("inputMember : " + inputMember);
+	//	log.debug("memberAddress : " + memberAddress);
+		
+	// 회원가입 서비스 호출
+		int result = service.signup(inputMember, memberAddress);
+		
+		String path = null;
+		String message = null;
+		
+		if(result > 0) { // 성공 시
+			message = inputMember.getMemberNickname() + "님의 가입을 환영합니다!";
+			path = "/";
+			
+		} else { // 실패
+			message = "회원가입 실패..";
+			path = "signup";
+		}
+		
+		ra.addFlashAttribute("message", message);
+		
+		return "redirect:" + path;
+		// 성공 -> redirect:/
+		// 실패 -> redirect:signup (상대경로)
+		// 		현재 주소 /member/signup (GET 방식 요청)
+	}
+	
+	@GetMapping("findId")
+	public String findId() {
+		
+		return "member/findId";
+	}
+	
+	@GetMapping("findPw")
+	public String findPw() {
+		
+		return "member/findPw";
+	}
+	
+
+	
 	
 	
 
