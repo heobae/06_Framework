@@ -139,8 +139,8 @@ function execDaumPostcode() {
 
 // 비밀번호 변경 form 태그
 const changePw = document.querySelector("#changePw");
-
-if(changePw != null) {
+// (== changePw) , 현재 페이지에서 changePw 요소가 존재할 때
+if(changePw != null) { // 이거 안 해주면 null 상태라 이벤트 안 먹힘
     // 제출 되었을 때
     changePw.addEventListener("submit", e => {
 
@@ -210,7 +210,7 @@ if(secession != null) {
         }
 
         // 정말 탈퇴? 물어보기
-        if( !confirm("정말 탈퇴 하시겠습니까?") ) {
+        if( !confirm("정말 탈퇴 하시겠습니까?") ) { // 취소버튼 눌렀을 때
             alert("취소 되었습니다.");
             e.preventDefault();
             return;
