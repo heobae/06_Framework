@@ -107,7 +107,7 @@ addBtn.addEventListener("click", () => {
   }
 
   
-  // POST 방힉 fetch() 비동기 요청 보내기
+  // POST 방식 fetch() 비동기 요청 보내기
   // - 요청 주소 : "/ajax/add"
   // - 데이터 전달방식 (method) : "post"
   // - 전달 데이터 : todoTitle값, todoContent값
