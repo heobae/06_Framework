@@ -239,7 +239,6 @@ const profileForm = document.getElementById("profile");  // 프로필 form
 
 if(profileForm != null) {
 
-
 const profileImg = document.getElementById("profileImg");  // 미리보기 이미지 img
 const imageInput = document.getElementById("imageInput");  // 이미지 파일 선택 input
 const deleteImage = document.getElementById("deleteImage");  // 이미지 삭제 버튼
