@@ -488,6 +488,8 @@ JOIN "MEMBER" M ON(B.MEMBER_NO = M.MEMBER_NO)
 WHERE B.BOARD_DEL_FL = 'N'
 AND BOARD_CODE = 1
 ORDER BY BOARD_NO DESC;
+
+SELECT * FROM BOARD_IMG;
 -----------------------------------------------------
 
 /* BOARD_IMG 테이블용 시퀀스 생성 */
@@ -495,23 +497,23 @@ CREATE SEQUENCE SEQ_IMG_NO NOCACHE;
 
 /* BOARD_IMG 테이블에 샘플 데이터 삽입 */
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본1.jpg', 'test1.jpg', 0, 2000
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본1.jpg', 'test1.jpg', 0, 1997
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본2.jpg', 'test2.jpg', 1, 2000
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본2.jpg', 'test2.jpg', 1, 1997
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본3.jpg', 'test3.jpg', 2, 2000
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본3.jpg', 'test3.jpg', 2, 1997
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본4.jpg', 'test4.jpg', 3, 2000
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본4.jpg', 'test4.jpg', 3, 1997
 );
 
 INSERT INTO "BOARD_IMG" VALUES(
-	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본5.jpg', 'test5.jpg', 4, 2000
+	SEQ_IMG_NO.NEXTVAL, '/images/board/', '원본5.jpg', 'test5.jpg', 4, 1997
 );
 
 
@@ -519,39 +521,101 @@ COMMIT;
 
 SELECT * FROM "BOARD_IMG";
 
+-- 0429 수행함
+
+-------------------------------------------------------
+
+-- 게시글 상세 조회 SQL
+SELECT BOARD_NO, BOARD_TITLE, BOARD_CONTENT, BOARD_CODE, READ_COUNT,
+MEMBER_NO, MEMBER_NICKNAME, PROFILE_IMG,
+TO_CHAR(BOARD_WRITE_DATE, 'YYYY"년" MM"월" DD"일" HH24:MI:SS') BOARD_WRITE_DATE,
+TO_CHAR(BOARD_UPDATE_DATE, 'YYYY"년" MM"월" DD"일" HH24:MI:SS') BOARD_UPDATE_DATE,
+
+(SELECT COUNT(*)
+FROM "BOARD_LIKE"
+WHERE BOARD_NO = 1997) LIKE_COUNT,
+
+(SELECT IMG_PATH || IMG_RENAME
+FROM "BOARD_IMG"
+WHERE BOARD_NO = 1997
+AND IMG_ORDER = 0) THUMBNAIL,
+
+(SELECT COUNT(*)
+FROM "BOARD_LIKE"
+WHERE BOARD_NO = 1997
+AND MEMBER_NO = 2) LIKE_CHECK
+
+FROM "BOARD"
+JOIN "MEMBER" USING(MEMBER_NO)
+WHERE BOARD_DEL_FL = 'N'
+AND BOARD_NO = 1997
+AND BOARD_CODE = 1;
+
+-- 상세 조회하고 있는 게시글의 이미지 목록 조회 SQL
+SELECT * FROM
+"BOARD_IMG"
+WHERE BOARD_NO = 1997
+ORDER BY IMG_ORDER;
+
+
+-- 상세 조회하고 있는 게시글의 댓글 목록 조회 SQL
+-- LEVEL : Oracle에서 제공하는 계층형 데이터 조회할 때 "레벨"에 있는지 알려주는
+-- 가상의 컬럼
+
+SELECT LEVEL, C.* FROM
+	(SELECT COMMENT_NO, COMMENT_CONTENT,
+	    TO_CHAR(COMMENT_WRITE_DATE, 'YYYY"년" MM"월" DD"일" HH24"시" MI"분" SS"초"') COMMENT_WRITE_DATE,
+	    BOARD_NO, MEMBER_NO, MEMBER_NICKNAME, PROFILE_IMG, PARENT_COMMENT_NO, COMMENT_DEL_FL
+	FROM "COMMENT"
+	JOIN MEMBER USING(MEMBER_NO)
+	WHERE BOARD_NO = 1997) C
+WHERE COMMENT_DEL_FL = 'N'
+OR 0 != (SELECT COUNT(*) FROM "COMMENT" SUB
+				WHERE SUB.PARENT_COMMENT_NO = C.COMMENT_NO
+				AND COMMENT_DEL_FL = 'N') -- 부모는 삭제되었어도 자식댓글이 살아있는 것
+START WITH PARENT_COMMENT_NO IS NULL -- 본인이 부모인 애
+CONNECT BY PRIOR COMMENT_NO = PARENT_COMMENT_NO -- 부모자식간에 떨어져있어도 연결해주겠다 ㄴ 형식으로 엮이게
+ORDER SIBLINGS BY COMMENT_NO -- 부모 자식간에 묶고, 같은 레벨끼리 정렬하고 코멘트 번호 순서대로 정렬
+;
+
+
 
 -- 댓글 샘플데이터
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 1',
-			  DEFAULT, DEFAULT,	2000, 1, NULL);
+			  DEFAULT, DEFAULT,	1997, 2, NULL);
+-- 수행함
 			 
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 2',
-			  DEFAULT, DEFAULT,	2000, 1, NULL);
+			  DEFAULT, DEFAULT,	1997, 2, NULL);
 			 
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 댓글 3',
-			  DEFAULT, DEFAULT,	2000, 1, NULL);
+			  DEFAULT, DEFAULT,	1997, 2, NULL);
+
+SELECT * FROM "COMMENT"
+ORDER BY COMMENT_NO DESC;
 
 -- 부모 댓글 1의 자식 댓글
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 1의 자식 1',
-			  DEFAULT, DEFAULT,	2000, 2, 2002);
+			  DEFAULT, DEFAULT,	1997, 2, 2022);
 			 
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 1의 자식 2',
-			  DEFAULT, DEFAULT,	2000, 2, 2002);
+			  DEFAULT, DEFAULT,	1997, 2, 2022);
 			 
 			 
 -- 부모 댓글 2의 자식 댓글			 
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 2의 자식 1',
-			  DEFAULT, DEFAULT,	2000, 2, 2003);
+			  DEFAULT, DEFAULT,	1997, 2, 2023);
 			 
 -- 부모 댓글 2의 자식 1의 자식 댓글			 
 INSERT INTO "COMMENT"	
 VALUES( SEQ_COMMENT_NO.NEXTVAL, '부모 2의 자식 1의 자식!!!',
-			  DEFAULT, DEFAULT,	2000, 2, 2007);
+			  DEFAULT, DEFAULT,	1997, 2, 2023);
 
 			 
 COMMIT;
