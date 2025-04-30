@@ -189,6 +189,18 @@ CREATE TABLE "BOARD_LIKE" (
 COMMENT ON COLUMN "BOARD_LIKE"."MEMBER_NO" IS '회원 번호(PK)';
 COMMENT ON COLUMN "BOARD_LIKE"."BOARD_NO" IS '게시글 번호(PK)';
 
+SELECT * FROM "BOARD_LIKE";
+
+INSERT INTO "BOARD_LIKE"
+VALUES(2, 1997); -- 2번 회원이 1997번 게시글에 좋아요를 누름
+
+COMMIT;
+
+-- 좋아요 여부 확인 ( 1: 좋아요 누름, 0: 좋아요 안 누름)
+SELECT COUNT(*) FROM "BOARD_LIKE"
+WHERE BOARD_NO = 1997
+AND MEMBER_NO = 2;
+
 -- 게시판 이미지 테이블
 CREATE TABLE "BOARD_IMG" (
 	"IMG_NO"	NUMBER		NOT NULL,
@@ -522,6 +534,37 @@ COMMIT;
 SELECT * FROM "BOARD_IMG";
 
 -- 0429 수행함
+
+
+INSERT INTO "BOARD_IMG"
+(
+	SELECT NEXT_IMG_NO(), '경로1', '원본1', '변경1', 1, 1999 FROM DUAL
+	UNION
+  SELECT NEXT_IMG_NO(), '경로2', '원본2', '변경2', 2, 1999 FROM DUAL
+	UNION
+	SELECT NEXT_IMG_NO(), '경로3', '원본3', '변경3', 3, 1999 FROM DUAL
+	UNION
+);
+
+-- SEQ_ING_NO 시퀀스의 다음값을 반환하는 함수 생성
+CREATE OR REPLACE FUNCTION NEXT_IMG_NO
+
+-- 반환형
+RETURN NUMBER
+
+-- 사용할 변수
+IS IMG_NO NUMBER;
+
+BEGIN
+	 SELECT SEQ_IMG_NO.NEXTVAL
+	 INTO ING_NO
+	 FROM DUAL;
+
+	 RETURN IMG_NO;
+END;
+
+ROLLBACK;
+
 
 -------------------------------------------------------
 
