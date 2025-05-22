@@ -20,7 +20,7 @@ const selectCommentList = () => {
   // fetch(주소, {method: "", header: "", body: ""})
 
   fetch("/comments?boardNo=" + boardNo) // GET 방식 요청
-  .then(resp => resp.json())
+  .then(resp => resp.json()) // 배열일 때 JSON, TEXT로 하게 되면 const result = json.parse(commentList); 필요
   .then(commentList => {
     console.log(commentList);
 

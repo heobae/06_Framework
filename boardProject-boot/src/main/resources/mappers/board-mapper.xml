@@ -111,6 +111,7 @@
 		ORDER BY BOARD_NO DESC
 	</select>
 	
+	<!-- 게시글 상세 조회 -->
 	<select id="selectOne" resultMap="board_rm">
 		SELECT BOARD_NO, BOARD_TITLE, BOARD_CONTENT, BOARD_CODE, READ_COUNT,
 		MEMBER_NO, MEMBER_NICKNAME, PROFILE_IMG,
