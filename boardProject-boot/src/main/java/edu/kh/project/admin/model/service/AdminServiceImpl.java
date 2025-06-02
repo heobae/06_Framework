@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.kh.project.admin.model.mapper.AdminMapper;
 import edu.kh.project.board.model.dto.Board;
+import edu.kh.project.common.utill.Utility;
 import edu.kh.project.member.model.dto.Member;
 import lombok.RequiredArgsConstructor;
 
@@ -92,5 +93,43 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	public int restoreBoard(int boardNo) {
 		return mapper.restoreBoard(boardNo);
+	}
+
+	/** 관리자 이메일 중복 여부 검사
+	 */
+	@Override
+	public int checkEmail(String memberEmail) {
+		return mapper.checkEmail(memberEmail);
+	}
+
+	/** 관리자 계정 발급
+	 */
+	@Override
+	public String createAdminAccount(Member member) {
+		
+		// 1. 영어(대소문자), 숫자 포함 6자리 난수로 만든 비밀번호를 암호화 한 값 구하기
+		String rawPw = Utility.generatePassword(); // 평문인 비밀번호를 얻어옴
+		
+		// 2. 평문 비밀번호를 암호화하여 저장
+		String encPw = bcrypt.encode(rawPw);
+		
+		// 3. member에 암호화 된 비밀번호 세팅
+		member.setMemberPw(encPw);
+		
+		// 4. DB에 암호화 된 비밀번호가 세팅된 member를 전달하여 계정 발급
+		int result = mapper.createAdminAccount(member);
+		
+		// 5. 계정 발급 정상처리 되었다면, 발급된 (평문) 비밀번호 리턴
+		if(result > 0 ) {
+			return rawPw;
+			
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public List<Member> adminAccountList() {
+		return mapper.adminAccountList();
 	}
 }

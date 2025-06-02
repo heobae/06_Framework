@@ -60,4 +60,21 @@ public interface AdminMapper {
 	 */
 	int restoreBoard(int boardNo);
 
+	/** 관리자 이메일 중복 여부 검사
+	 * @param memberEmail
+	 * @return
+	 */
+	int checkEmail(String memberEmail);
+
+	/** 관리자 계정 발급
+	 * @param member
+	 * @return
+	 */
+	int createAdminAccount(Member member);
+
+	/** 관리자 계정 목록
+	 * @return
+	 */
+	List<Member> adminAccountList();
+
 }
