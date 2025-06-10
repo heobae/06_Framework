@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 // 클라이언트와 서버가 서로 다른 출처(origin)에서 요청을 주고 받을 때 발생하는 보안 정책
 // 브라우저에서는 기본적으로 다른 출처(도메인, 프로토콜, 포트)의 요청을 차단함.
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173") // 이 http를 허용함
 @RestController
 public class MyAppController {
 	
